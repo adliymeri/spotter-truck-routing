@@ -1,11 +1,21 @@
 import { Alert, Box, Divider, Paper, Typography } from "@mui/material";
+import { useState } from "react";
 
 import { usePlanTrip } from "./api/hooks";
+import type { PlanRequest } from "./api/types";
 import TripMap from "./features/map/TripMap";
+import RouteList from "./features/route-list/RouteList";
 import TripForm from "./features/trip-form/TripForm";
 
 export default function App() {
   const planTrip = usePlanTrip();
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+
+  function handlePlan(request: PlanRequest) {
+    planTrip.mutate(request, {
+      onSuccess: (plan) => setSelectedRouteId(plan.recommended_route_id),
+    });
+  }
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
@@ -21,21 +31,27 @@ export default function App() {
           Compare routes by weather risk, load and travel time.
         </Typography>
 
-        <TripForm onSubmit={(request) => planTrip.mutate(request)} isLoading={planTrip.isPending} />
+        <TripForm onSubmit={handlePlan} isLoading={planTrip.isPending} />
 
         <Divider sx={{ my: 2.5 }} />
 
         {planTrip.isError && <Alert severity="error">{planTrip.error.message}</Alert>}
 
         {planTrip.data && (
-          <Typography variant="body2">
-            Got {planTrip.data.routes.length} routes. Recommended: {planTrip.data.recommended_route_id}
-          </Typography>
+          <RouteList
+            plan={planTrip.data}
+            selectedRouteId={selectedRouteId}
+            onSelectRoute={setSelectedRouteId}
+          />
         )}
       </Paper>
 
       <Box sx={{ flex: 1, position: "relative" }}>
-        <TripMap />
+        <TripMap
+          plan={planTrip.data}
+          selectedRouteId={selectedRouteId}
+          onSelectRoute={setSelectedRouteId}
+        />
       </Box>
     </Box>
   );
