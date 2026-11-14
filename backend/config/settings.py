@@ -134,3 +134,6 @@ else:
     }
 
 WEATHER_CACHE_SECONDS = int(os.environ.get("WEATHER_CACHE_SECONDS", "1800"))
+
+MAPBOX_GEOCODING_URL = os.environ.get("MAPBOX_GEOCODING_URL", "https://api.mapbox.com/search/geocode/v6/forward")
+MAPBOX_GEOCODING_COUNTRIES = os.environ.get("MAPBOX_GEOCODING_COUNTRIES", "us,ca")

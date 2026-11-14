@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from planner import wiring
 from planner.api.presenters import present_heatmap, present_trip_plan
-from planner.api.serializers import HeatmapRequestSerializer, PlanRequestSerializer
+from planner.api.serializers import HeatmapRequestSerializer, PlanRequestSerializer, GeocodeQuerySerializer
 from planner.application.build_heatmap import build_heatmap
 from planner.application.plan_trip import plan_trip
 from planner.ports import ProviderError
@@ -39,3 +39,15 @@ def heatmap(request):
     except ProviderError as exc:
         return _provider_error(exc)
     return Response(present_heatmap(result))
+
+@api_view(["GET"])
+def geocode(request):
+    serializer = GeocodeQuerySerializer(data=request.query_params)
+    serializer.is_valid(raise_exception=True)
+    try:
+        results = wiring.geocoder().search(serializer.validated_data["q"])
+    except ProviderError as exc:
+        return _provider_error(exc)
+    return Response(
+        {"results": [{"label": label, "lat": p.lat, "lng": p.lng} for label, p in results]}
+    )

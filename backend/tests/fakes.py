@@ -31,3 +31,12 @@ class FakeWeather:
 
     def get_hourly_grid(self, points, start, hours=48):
         return [[self.fn(p, start + timedelta(hours=h)) for h in range(hours + 1)] for p in points]
+
+class FakeGeocoder:
+    def __init__(self, results: list[tuple[str, LatLng]]):
+        self.results = results
+        self.queries: list[str] = []
+
+    def search(self, query: str, limit: int = 5):
+        self.queries.append(query)
+        return self.results[:limit]
