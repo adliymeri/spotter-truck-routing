@@ -40,7 +40,9 @@ def make_routing(direct_routes, detour_route=None, calls=None) -> MapboxRouting:
         waypoints = request.url.path.rsplit("/", 1)[-1].split(";")
         if len(waypoints) == 2:
             return httpx.Response(200, json={"code": "Ok", "routes": direct_routes})
-        detour = detour_route(len(calls)) if detour_route else fake_route(shifted(len(calls)), 300_000, 12_000)
+        detour = (
+            detour_route(len(calls)) if detour_route else fake_route(shifted(len(calls)), 300_000, 12_000)
+        )
         return httpx.Response(200, json={"code": "Ok", "routes": [detour]})
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
@@ -50,11 +52,13 @@ def make_routing(direct_routes, detour_route=None, calls=None) -> MapboxRouting:
 
 
 def test_three_routes_converted_and_sorted_by_duration():
-    routing = make_routing([
-        fake_route(shifted(0), 160_934.4, 7200),
-        fake_route(shifted(1), 170_000, 5400),
-        fake_route(shifted(2), 180_000, 9000),
-    ])
+    routing = make_routing(
+        [
+            fake_route(shifted(0), 160_934.4, 7200),
+            fake_route(shifted(1), 170_000, 5400),
+            fake_route(shifted(2), 180_000, 9000),
+        ]
+    )
     routes = routing.get_routes(ORIGIN, DESTINATION)
 
     assert [r.id for r in routes] == ["route-1", "route-2", "route-3"]
@@ -69,7 +73,9 @@ def test_three_routes_converted_and_sorted_by_duration():
 
 def test_detours_fill_up_to_three_routes():
     calls: list[httpx.Request] = []
-    routes = make_routing([fake_route(MAIN_COORDS, 200_000, 9000)], calls=calls).get_routes(ORIGIN, DESTINATION)
+    routes = make_routing([fake_route(MAIN_COORDS, 200_000, 9000)], calls=calls).get_routes(
+        ORIGIN, DESTINATION
+    )
     assert len(routes) == 3
     assert len(calls) == 3
 
