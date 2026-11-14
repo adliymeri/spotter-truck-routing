@@ -10,7 +10,13 @@ class ProviderError(Exception):
 
 
 class RoutingProvider(Protocol):
-    def get_routes(self, origin: LatLng, destination: LatLng, max_routes: int = 3) -> list[RouteOption]: ...
+    def get_routes(
+        self,
+        origin: LatLng,
+        destination: LatLng,
+        max_routes: int = 3,
+        max_weight_lb: float | None = None,
+    ) -> list[RouteOption]: ...
 
 
 class WeatherProvider(Protocol):

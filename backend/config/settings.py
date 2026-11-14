@@ -107,3 +107,6 @@ MAILERS = {
 OPEN_METEO_URL = os.environ.get("OPEN_METEO_URL", "https://api.open-meteo.com/v1/forecast")
 OPEN_METEO_TIMEOUT_SECONDS = float(os.environ.get("OPEN_METEO_TIMEOUT_SECONDS", "15"))
 OPEN_METEO_BATCH_SIZE = int(os.environ.get("OPEN_METEO_BATCH_SIZE", "100"))
+MAPBOX_TOKEN = os.environ.get("MAPBOX_TOKEN", "")
+MAPBOX_DIRECTIONS_URL = os.environ.get("MAPBOX_DIRECTIONS_URL", "https://api.mapbox.com/directions/v5/mapbox/driving")
+MAPBOX_TIMEOUT_SECONDS = float(os.environ.get("MAPBOX_TIMEOUT_SECONDS", "15"))
