@@ -12,8 +12,9 @@ METERS_PER_MILE = 1609.344
 LB_PER_TONNE = 2204.62
 MAX_WEIGHT_TONNES = 100
 MILES_PER_DEGREE_LAT = 69.0
-DETOUR_FACTORS = (0.1, -0.1, 0.2, -0.2)
-MIN_DISTANCE_DIFFERENCE = 0.02
+DETOUR_FACTORS = (0.15, -0.15, 0.3, -0.3)
+OVERLAP_CELL_DEGREES = 0.01
+MAX_SHARED_FRACTION = 0.8
 
 
 class MapboxRouting:
@@ -124,8 +125,30 @@ def _detour_point(route: RouteOption, origin: LatLng, destination: LatLng, facto
     )
 
 
+Cell = tuple[int, int]
+
+
+def _cell(p: LatLng) -> Cell:
+    return (round(p.lat / OVERLAP_CELL_DEGREES), round(p.lng / OVERLAP_CELL_DEGREES))
+
+
+def _cells(route: RouteOption) -> set[Cell]:
+    return {_cell(p) for p in route.geometry}
+
+
+def _shared_fraction(candidate: RouteOption, other_cells: set[Cell]) -> float:
+    """Share of the candidate's miles that run along roads in other_cells."""
+    total = candidate.cumulative_miles[-1]
+    if total <= 0:
+        return 1.0
+    shared = 0.0
+    for i in range(len(candidate.geometry) - 1):
+        ci, cj = _cell(candidate.geometry[i])
+        near = any((ci + di, cj + dj) in other_cells for di in (-1, 0, 1) for dj in (-1, 0, 1))
+        if near:
+            shared += candidate.cumulative_miles[i + 1] - candidate.cumulative_miles[i]
+    return shared / total
+
+
 def _is_distinct(candidate: RouteOption, existing: Sequence[RouteOption]) -> bool:
-    return all(
-        abs(candidate.distance_miles - r.distance_miles) / (r.distance_miles or 1) > MIN_DISTANCE_DIFFERENCE
-        for r in existing
-    )
+    return all(_shared_fraction(candidate, _cells(r)) <= MAX_SHARED_FRACTION for r in existing)
