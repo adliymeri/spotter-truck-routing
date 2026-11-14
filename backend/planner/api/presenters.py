@@ -1,3 +1,4 @@
+from planner.application.build_heatmap import Heatmap
 from planner.application.plan_trip import RoutePlan, TripPlan
 from planner.domain.entities import AssessedCheckpoint
 
@@ -41,4 +42,13 @@ def _present_checkpoint(a: AssessedCheckpoint) -> dict:
         "snow_in_per_hr": round(a.weather.snow_in_per_hr, 2),
         "risk_level": a.risk.level.name,
         "risk_drivers": list(a.risk.drivers),
+    }
+
+def present_heatmap(heatmap: Heatmap) -> dict:
+    return {
+        "start": heatmap.start.isoformat(),
+        "hours": len(heatmap.frames) - 1,
+        "spacing_miles": round(heatmap.spacing_miles, 1),
+        "points": [[round(p.lng, 4), round(p.lat, 4)] for p in heatmap.points],
+        "frames": [[int(level) for level in frame] for frame in heatmap.frames],
     }
