@@ -102,3 +102,8 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# External services
+OPEN_METEO_URL = os.environ.get("OPEN_METEO_URL", "https://api.open-meteo.com/v1/forecast")
+OPEN_METEO_TIMEOUT_SECONDS = float(os.environ.get("OPEN_METEO_TIMEOUT_SECONDS", "15"))
+OPEN_METEO_BATCH_SIZE = int(os.environ.get("OPEN_METEO_BATCH_SIZE", "100"))
