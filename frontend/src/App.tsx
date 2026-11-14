@@ -1,19 +1,26 @@
 import { Alert, Box, Divider, Paper, Typography } from "@mui/material";
 import { useState } from "react";
 
-import { usePlanTrip } from "./api/hooks";
+import { HEATMAP_HOURS, useHeatmap, usePlanTrip } from "./api/hooks";
 import type { PlanRequest } from "./api/types";
+import ForecastSlider from "./features/map/ForecastSlider";
 import TripMap from "./features/map/TripMap";
 import RouteList from "./features/route-list/RouteList";
 import TripForm from "./features/trip-form/TripForm";
 
 export default function App() {
   const planTrip = usePlanTrip();
+  const heatmap = useHeatmap(planTrip.data, planTrip.variables);
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+  const [hour, setHour] = useState(0);
+  const [showHeatmap, setShowHeatmap] = useState(true);
 
   function handlePlan(request: PlanRequest) {
     planTrip.mutate(request, {
-      onSuccess: (plan) => setSelectedRouteId(plan.recommended_route_id),
+      onSuccess: (plan) => {
+        setSelectedRouteId(plan.recommended_route_id);
+        setHour(0);
+      },
     });
   }
 
@@ -51,7 +58,22 @@ export default function App() {
           plan={planTrip.data}
           selectedRouteId={selectedRouteId}
           onSelectRoute={setSelectedRouteId}
+          heatmap={showHeatmap ? heatmap.data : undefined}
+          hour={hour}
         />
+
+        {planTrip.data && planTrip.variables && (
+          <ForecastSlider
+            start={planTrip.variables.departure}
+            hours={HEATMAP_HOURS}
+            hour={hour}
+            onHourChange={setHour}
+            visible={showHeatmap}
+            onVisibleChange={setShowHeatmap}
+            loading={heatmap.isFetching}
+            error={heatmap.error?.message}
+          />
+        )}
       </Box>
     </Box>
   );

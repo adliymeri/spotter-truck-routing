@@ -12,13 +12,14 @@ import Map, {
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { TripPlan } from "../../api/types";
+import type { Heatmap, TripPlan } from "../../api/types";
 import { RISK_COLORS } from "../../theme/riskColors";
 import { boundsOf } from "../../utils/geo";
 import CheckpointPopup from "./CheckpointPopup";
 import maplibregl from "./maplibre";
 import RiskLegend from "./RiskLegend";
 import { riskSegments } from "./riskSegments";
+import WeatherHeatmap from "./WeatherHeatmap";
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const INITIAL_VIEW = { longitude: -96, latitude: 39, zoom: 3.6 };
@@ -30,9 +31,11 @@ interface Props {
   plan: TripPlan | undefined;
   selectedRouteId: string | null;
   onSelectRoute: (routeId: string) => void;
+  heatmap: Heatmap | undefined;
+  hour: number;
 }
 
-export default function TripMap({ plan, selectedRouteId, onSelectRoute }: Props) {
+export default function TripMap({ plan, selectedRouteId, onSelectRoute, heatmap, hour }: Props) {
   const mapRef = useRef<MapRef>(null);
   const [popupIndex, setPopupIndex] = useState<number | null>(null);
   const [hovering, setHovering] = useState(false);
@@ -131,7 +134,7 @@ export default function TripMap({ plan, selectedRouteId, onSelectRoute }: Props)
             paint={{ "line-color": "#0d1b2a", "line-width": 9 }}
           />
         </Source>
-
+        {heatmap && <WeatherHeatmap heatmap={heatmap} hour={hour} beforeId="routes-other" />}
         <Source id="risk-segments" type="geojson" data={segmentsGeojson}>
           <Layer
             id="route-risk"
