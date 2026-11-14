@@ -11,6 +11,7 @@ DAY = datetime(2026, 11, 20, tzinfo=UTC)
 T0 = int(DAY.timestamp())
 requests_made: list[httpx.Request] = []
 
+
 def fake_api(request: httpx.Request) -> httpx.Response:
     requests_made.append(request)
     count = len(request.url.params["latitude"].split(","))
@@ -26,6 +27,7 @@ def fake_api(request: httpx.Request) -> httpx.Response:
     }
     return httpx.Response(200, json=[item] * count)
 
+
 class DictCache:
     def __init__(self):
         self.data: dict = {}
@@ -35,7 +37,8 @@ class DictCache:
 
     def set_many(self, data, timeout=None):
         self.data.update(data)
-        
+
+
 def make_weather(batch_size: int = 100, cache: DictCache | None = None) -> OpenMeteoWeather:
     client = httpx.Client(transport=httpx.MockTransport(fake_api))
     return OpenMeteoWeather(
@@ -69,10 +72,12 @@ def test_missing_values_become_zero(weather):
 
 
 def test_nearby_points_share_one_location(weather):
-    weather.get_samples([
-        (LatLng(40.001, -100.001), DAY),
-        (LatLng(40.002, -100.002), DAY),
-    ])
+    weather.get_samples(
+        [
+            (LatLng(40.001, -100.001), DAY),
+            (LatLng(40.002, -100.002), DAY),
+        ]
+    )
     assert requests_made[0].url.params["latitude"] == "40.0"
 
 
@@ -85,6 +90,7 @@ def test_requests_are_batched():
     requests_made.clear()
     make_weather(batch_size=2).get_samples([(LatLng(40 + i, -100.0), DAY) for i in range(5)])
     assert len(requests_made) == 3
+
 
 def test_cached_locations_are_not_requested_again():
     requests_made.clear()

@@ -31,15 +31,19 @@ def make_routing(direct_routes: list[dict], calls: list[httpx.Request] | None = 
         return httpx.Response(200, json={"code": "Ok", "routes": [detour]})
 
     client = httpx.Client(transport=httpx.MockTransport(handler))
-    return MapboxRouting(token=TOKEN, base_url="https://test.local/directions", timeout_seconds=1, client=client)
+    return MapboxRouting(
+        token=TOKEN, base_url="https://test.local/directions", timeout_seconds=1, client=client
+    )
 
 
 def test_three_routes_converted_and_sorted_by_duration():
-    routing = make_routing([
-        fake_route(160_934.4, 7200),
-        fake_route(170_000, 5400),
-        fake_route(180_000, 9000),
-    ])
+    routing = make_routing(
+        [
+            fake_route(160_934.4, 7200),
+            fake_route(170_000, 5400),
+            fake_route(180_000, 9000),
+        ]
+    )
     routes = routing.get_routes(ORIGIN, DESTINATION)
 
     assert [r.id for r in routes] == ["route-1", "route-2", "route-3"]
@@ -67,7 +71,9 @@ def test_weight_is_sent_in_tonnes():
 
 def test_http_error_does_not_leak_token():
     client = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(401)))
-    routing = MapboxRouting(token=TOKEN, base_url="https://test.local/directions", timeout_seconds=1, client=client)
+    routing = MapboxRouting(
+        token=TOKEN, base_url="https://test.local/directions", timeout_seconds=1, client=client
+    )
     with pytest.raises(ProviderError) as exc:
         routing.get_routes(ORIGIN, DESTINATION)
     assert TOKEN not in str(exc.value)

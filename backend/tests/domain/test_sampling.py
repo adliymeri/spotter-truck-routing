@@ -17,12 +17,15 @@ ROUTE = RouteOption(
 )
 
 
-@pytest.mark.parametrize("total,interval,expected", [
-    (120, 50, [0, 50, 100, 120]),
-    (100, 50, [0, 50, 100]),
-    (30, 50, [0, 30]),
-    (0, 10, [0.0]),
-])
+@pytest.mark.parametrize(
+    "total,interval,expected",
+    [
+        (120, 50, [0, 50, 100, 120]),
+        (100, 50, [0, 50, 100]),
+        (30, 50, [0, 30]),
+        (0, 10, [0.0]),
+    ],
+)
 def test_checkpoint_miles(total, interval, expected):
     assert checkpoint_miles(total, interval) == expected
 

@@ -19,7 +19,10 @@ def checkpoint_miles(total_miles: float, interval_miles: float) -> list[float]:
 
 
 def sample_checkpoints(route: RouteOption, interval_miles: float, departure: datetime) -> list[Checkpoint]:
-    """Each checkpoint covers the road halfway to its neighbours, so segment_miles sums to the route length."""
+    """
+    Each checkpoint covers the road halfway to its neighbours,
+    so segment_miles sums to the route length.
+    """
     if interval_miles <= 0:
         raise ValueError("interval_miles must be positive")
     if departure.tzinfo is None:

@@ -19,12 +19,19 @@ def test_results_are_parsed():
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params["q"] == "chicago"
         assert request.url.params["country"] == "us"
-        return httpx.Response(200, json={"features": [
-            {"properties": {"full_address": "Chicago, Illinois, United States"},
-             "geometry": {"coordinates": [-87.63, 41.88]}},
-            {"properties": {"name": "Chicago Heights"}, "geometry": {"coordinates": [-87.64, 41.5]}},
-            {"properties": {}, "geometry": {"coordinates": [0, 0]}},
-        ]})
+        return httpx.Response(
+            200,
+            json={
+                "features": [
+                    {
+                        "properties": {"full_address": "Chicago, Illinois, United States"},
+                        "geometry": {"coordinates": [-87.63, 41.88]},
+                    },
+                    {"properties": {"name": "Chicago Heights"}, "geometry": {"coordinates": [-87.64, 41.5]}},
+                    {"properties": {}, "geometry": {"coordinates": [0, 0]}},
+                ]
+            },
+        )
 
     results = make_geocoder(handler).search("chicago")
     assert results == [

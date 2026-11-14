@@ -6,6 +6,7 @@ range (e.g. wind 35.0 mph -> HIGH, rain 0.25 in/hr -> HIGH).
 The spec's "No Travel" bounds are followed literally: wind >= 55 mph,
 rain > 1.00 in/hr, snow > 3.0 in/hr.
 """
+
 from planner.domain.entities import RiskAssessment, RiskLevel, WeatherSample
 
 

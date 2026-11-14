@@ -67,5 +67,6 @@ class HeatmapRequestSerializer(serializers.Serializer):
             weight_lb=data["weight_lb"],
         )
 
+
 class GeocodeQuerySerializer(serializers.Serializer):
     q = serializers.CharField(min_length=2, max_length=200, trim_whitespace=True)

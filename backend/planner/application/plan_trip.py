@@ -47,12 +47,12 @@ def plan_trip(request: TripRequest, routing: RoutingProvider, weather: WeatherPr
 
     plans: list[RoutePlan] = []
     offset = 0
-    for route, cps in zip(routes, checkpoints_per_route):
+    for route, cps in zip(routes, checkpoints_per_route, strict=True):
         route_samples = samples[offset : offset + len(cps)]
         offset += len(cps)
         assessed = tuple(
             AssessedCheckpoint(cp, sample, assess(sample, request.weight_lb))
-            for cp, sample in zip(cps, route_samples)
+            for cp, sample in zip(cps, route_samples, strict=True)
         )
         plans.append(RoutePlan(route, assessed, summarize_route(route, assessed)))
 

@@ -1,6 +1,7 @@
 import math
 from bisect import bisect_right
 from collections.abc import Sequence
+from itertools import pairwise
 
 from planner.domain.entities import LatLng
 
@@ -17,7 +18,7 @@ def haversine_miles(a: LatLng, b: LatLng) -> float:
 
 def cumulative_miles(points: Sequence[LatLng]) -> list[float]:
     totals = [0.0]
-    for prev, cur in zip(points, points[1:]):
+    for prev, cur in pairwise(points):
         totals.append(totals[-1] + haversine_miles(prev, cur))
     return totals
 

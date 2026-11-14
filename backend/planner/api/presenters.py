@@ -44,6 +44,7 @@ def _present_checkpoint(a: AssessedCheckpoint) -> dict:
         "risk_drivers": list(a.risk.drivers),
     }
 
+
 def present_heatmap(heatmap: Heatmap) -> dict:
     return {
         "start": heatmap.start.isoformat(),

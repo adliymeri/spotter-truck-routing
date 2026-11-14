@@ -48,7 +48,9 @@ class MapboxRouting:
         selected = sorted(routes[:max_routes], key=lambda r: r.duration_hours)
         return [replace(r, id=f"route-{i + 1}") for i, r in enumerate(selected)]
 
-    def _request(self, points: Sequence[LatLng], alternatives: bool, max_weight_lb: float | None) -> list[RouteOption]:
+    def _request(
+        self, points: Sequence[LatLng], alternatives: bool, max_weight_lb: float | None
+    ) -> list[RouteOption]:
         coords = ";".join(f"{p.lng},{p.lat}" for p in points)
         params: dict[str, str | float] = {
             "access_token": self._token,

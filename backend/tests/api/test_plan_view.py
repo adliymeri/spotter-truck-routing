@@ -24,7 +24,9 @@ def payload(**overrides) -> dict:
 
 @pytest.fixture
 def fakes(monkeypatch):
-    routing = FakeRouting([straight_route("route-1", lat=0.0, hours=2), straight_route("route-2", lat=1.0, hours=3)])
+    routing = FakeRouting(
+        [straight_route("route-1", lat=0.0, hours=2), straight_route("route-2", lat=1.0, hours=3)]
+    )
     weather = FakeWeather(lambda p, t: WeatherSample(50 if p.lat < 0.5 else 5, 0, 0))
     monkeypatch.setattr(wiring, "routing", lambda: routing)
     monkeypatch.setattr(wiring, "weather", lambda: weather)

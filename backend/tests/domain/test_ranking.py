@@ -7,9 +7,11 @@ from planner.domain.entities import (
     Checkpoint,
     LatLng,
     RiskAssessment,
-    RiskLevel as R,
     RouteOption,
     WeatherSample,
+)
+from planner.domain.entities import (
+    RiskLevel as R,
 )
 from planner.domain.ranking import rank_routes, summarize_route
 

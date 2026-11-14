@@ -133,7 +133,9 @@ class OpenMeteoWeather:
                 fresh[loc] = _parse(item)
 
         if self._cache and fresh:
-            self._cache.set_many({cache_keys[loc]: s for loc, s in fresh.items()}, timeout=self._cache_seconds)
+            self._cache.set_many(
+                {cache_keys[loc]: s for loc, s in fresh.items()}, timeout=self._cache_seconds
+            )
 
         result.update(fresh)
         return result

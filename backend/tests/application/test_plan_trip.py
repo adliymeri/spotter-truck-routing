@@ -18,7 +18,9 @@ def windy_south(p: LatLng, t: datetime) -> WeatherSample:
 
 
 def test_safer_route_recommended_even_if_slower():
-    routing = FakeRouting([straight_route("fast", lat=0.0, hours=2), straight_route("safe", lat=1.0, hours=3)])
+    routing = FakeRouting(
+        [straight_route("fast", lat=0.0, hours=2), straight_route("safe", lat=1.0, hours=3)]
+    )
     plan = plan_trip(request(), routing, FakeWeather(windy_south))
 
     assert plan.recommended_route_id == "safe"
