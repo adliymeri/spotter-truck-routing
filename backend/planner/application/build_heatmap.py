@@ -7,7 +7,7 @@ from planner.domain.risk import assess
 from planner.ports import WeatherProvider
 
 CORRIDOR_RADIUS_MILES = 25.0
-MAX_HEATMAP_POINTS = 200
+MAX_HEATMAP_POINTS = 300
 
 
 @dataclass(frozen=True, slots=True)
