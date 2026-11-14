@@ -4,4 +4,5 @@ from planner.api import views
 
 urlpatterns = [
     path("health/", views.health),
+    path("plan/", views.plan),
 ]

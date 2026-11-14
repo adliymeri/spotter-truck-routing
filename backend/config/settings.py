@@ -110,3 +110,9 @@ OPEN_METEO_BATCH_SIZE = int(os.environ.get("OPEN_METEO_BATCH_SIZE", "100"))
 MAPBOX_TOKEN = os.environ.get("MAPBOX_TOKEN", "")
 MAPBOX_DIRECTIONS_URL = os.environ.get("MAPBOX_DIRECTIONS_URL", "https://api.mapbox.com/directions/v5/mapbox/driving")
 MAPBOX_TIMEOUT_SECONDS = float(os.environ.get("MAPBOX_TIMEOUT_SECONDS", "15"))
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "UNAUTHENTICATED_USER": None,
+}
