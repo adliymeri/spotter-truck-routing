@@ -57,3 +57,12 @@ class AssessedCheckpoint:
     checkpoint: Checkpoint
     weather: WeatherSample
     risk: RiskAssessment
+
+@dataclass(frozen=True, slots=True)
+class RouteSummary:
+    route_id: str
+    distance_miles: float
+    duration_hours: float
+    miles_by_level: dict[RiskLevel, float]
+    avg_risk: float
+    worst_level: RiskLevel
