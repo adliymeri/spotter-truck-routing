@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from django.conf import settings
+from django.core.cache import cache
 
 from planner.adapters.mapbox_routing import MapboxRouting
 from planner.adapters.open_meteo import OpenMeteoWeather
@@ -21,4 +22,6 @@ def weather() -> OpenMeteoWeather:
         base_url=settings.OPEN_METEO_URL,
         timeout_seconds=settings.OPEN_METEO_TIMEOUT_SECONDS,
         batch_size=settings.OPEN_METEO_BATCH_SIZE,
+        cache=cache,
+        cache_seconds=settings.WEATHER_CACHE_SECONDS,
     )
