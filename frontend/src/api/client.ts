@@ -35,8 +35,7 @@ export const api = {
   geocode: (q: string, signal?: AbortSignal) =>
     request<{ results: Place[] }>(`/geocode/?q=${encodeURIComponent(q)}`, { signal }).then((r) => r.results),
 
-  plan: (body: PlanRequest) =>
-    request<TripPlan>("/plan/", { method: "POST", body: JSON.stringify(body) }),
+  plan: (body: PlanRequest) => request<TripPlan>("/plan/", { method: "POST", body: JSON.stringify(body) }),
 
   heatmap: (body: HeatmapRequest) =>
     request<Heatmap>("/heatmap/", { method: "POST", body: JSON.stringify(body) }),

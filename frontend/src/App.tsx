@@ -26,11 +26,7 @@ export default function App() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <Paper
-        square
-        elevation={3}
-        sx={{ width: 400, flexShrink: 0, p: 2.5, overflowY: "auto", zIndex: 1 }}
-      >
+      <Paper square elevation={3} sx={{ width: 400, flexShrink: 0, p: 2.5, overflowY: "auto", zIndex: 1 }}>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           Weather-Aware Truck Routing
         </Typography>

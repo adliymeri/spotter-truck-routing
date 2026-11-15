@@ -23,7 +23,8 @@ import WeatherHeatmap from "./WeatherHeatmap";
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const INITIAL_VIEW = { longitude: -96, latitude: 39, zoom: 3.6 };
-const WEATHER_ATTRIBUTION = 'Weather data by <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a>';
+const WEATHER_ATTRIBUTION =
+  'Weather data by <a href="https://open-meteo.com/" target="_blank">Open-Meteo</a>';
 const INTERACTIVE_LAYERS = ["checkpoints", "routes-hit"];
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
@@ -37,20 +38,20 @@ interface Props {
 
 export default function TripMap({ plan, selectedRouteId, onSelectRoute, heatmap, hour }: Props) {
   const mapRef = useRef<MapRef>(null);
-  const [popupIndex, setPopupIndex] = useState<number | null>(null);
+  const [popup, setPopup] = useState<{ plan: TripPlan; routeId: string; index: number } | null>(null);
   const [hovering, setHovering] = useState(false);
 
   const selected = plan?.routes.find((r) => r.id === selectedRouteId);
-  const popupCheckpoint = selected?.checkpoints.find((c) => c.index === popupIndex);
+  const popupCheckpoint =
+    popup && selected && popup.plan === plan && popup.routeId === selected.id
+      ? selected.checkpoints.find((c) => c.index === popup.index)
+      : undefined;
 
   useEffect(() => {
-    setPopupIndex(null);
     if (!plan) return;
     const bounds = boundsOf(plan.routes.flatMap((r) => r.geometry));
     mapRef.current?.fitBounds(bounds, { padding: 80, duration: 800 });
   }, [plan]);
-
-  useEffect(() => setPopupIndex(null), [selectedRouteId]);
 
   const routesGeojson = useMemo<FeatureCollection<LineString, { id: string }>>(
     () => ({
@@ -81,11 +82,13 @@ export default function TripMap({ plan, selectedRouteId, onSelectRoute, heatmap,
   function handleClick(event: MapLayerMouseEvent) {
     const feature = event.features?.[0];
     if (!feature) {
-      setPopupIndex(null);
+      setPopup(null);
       return;
     }
     if (feature.layer.id === "checkpoints") {
-      setPopupIndex(Number(feature.properties.index));
+      if (plan && selected) {
+        setPopup({ plan, routeId: selected.id, index: Number(feature.properties.index) });
+      }
     } else {
       onSelectRoute(String(feature.properties.id));
     }
@@ -134,7 +137,9 @@ export default function TripMap({ plan, selectedRouteId, onSelectRoute, heatmap,
             paint={{ "line-color": "#0d1b2a", "line-width": 9 }}
           />
         </Source>
+
         {heatmap && <WeatherHeatmap heatmap={heatmap} hour={hour} beforeId="routes-other" />}
+
         <Source id="risk-segments" type="geojson" data={segmentsGeojson}>
           <Layer
             id="route-risk"
@@ -165,7 +170,7 @@ export default function TripMap({ plan, selectedRouteId, onSelectRoute, heatmap,
             longitude={popupCheckpoint.lng}
             latitude={popupCheckpoint.lat}
             closeOnClick={false}
-            onClose={() => setPopupIndex(null)}
+            onClose={() => setPopup(null)}
             maxWidth="280px"
           >
             <CheckpointPopup checkpoint={popupCheckpoint} />
