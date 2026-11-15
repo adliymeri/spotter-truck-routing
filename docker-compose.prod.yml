@@ -1,0 +1,32 @@
+name: spotter
+
+services:
+  backend:
+    image: ghcr.io/adliymeri/spotter-backend:latest
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [redis]
+    restart: unless-stopped
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    restart: unless-stopped
+    networks: [internal]
+
+  web:
+    image: ghcr.io/adliymeri/spotter-web:latest
+    depends_on: [backend]
+    restart: unless-stopped
+    networks:
+      internal:
+      edge:
+        aliases: [spotter-web]
+
+networks:
+  internal:
+  edge:
+    external: true
+    name: edge
