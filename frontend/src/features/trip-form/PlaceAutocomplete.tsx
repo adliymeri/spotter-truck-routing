@@ -16,7 +16,8 @@ const samePlace = (a: Place, b: Place) => a.label === b.label && a.lat === b.lat
 export default function PlaceAutocomplete({ label, value, onChange }: Props) {
   const [input, setInput] = useState("");
   const debounced = useDebouncedValue(input, 300);
-  const { data = [], isFetching } = usePlaceSearch(debounced);
+  const query = value && debounced === value.label ? "" : debounced;
+  const { data = [], isFetching } = usePlaceSearch(query);
 
   const options = value && !data.some((p) => samePlace(p, value)) ? [value, ...data] : data;
 
