@@ -1,6 +1,9 @@
 from planner.application.build_heatmap import Heatmap
 from planner.application.plan_trip import RoutePlan, TripPlan
 from planner.domain.entities import AssessedCheckpoint
+from planner.domain.geo import simplify
+
+DISPLAY_TOLERANCE_DEG = 0.0005
 
 
 def present_trip_plan(plan: TripPlan) -> dict:
@@ -18,7 +21,9 @@ def _present_route(p: RoutePlan) -> dict:
         "distance_miles": round(p.route.distance_miles, 1),
         "duration_hours": round(p.route.duration_hours, 2),
         "arrival": p.checkpoints[-1].checkpoint.eta.isoformat(),
-        "geometry": [[round(pt.lng, 5), round(pt.lat, 5)] for pt in p.route.geometry],
+        "geometry": [
+            [round(pt.lng, 5), round(pt.lat, 5)] for pt in simplify(p.route.geometry, DISPLAY_TOLERANCE_DEG)
+        ],
         "summary": {
             "miles_by_level": {level.name: round(m, 1) for level, m in s.miles_by_level.items()},
             "avg_risk": round(s.avg_risk, 3),

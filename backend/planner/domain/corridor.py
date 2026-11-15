@@ -8,6 +8,7 @@ from planner.domain.geo import haversine_miles
 MILES_PER_DEGREE_LAT = 69.0
 INITIAL_SPACING_MILES = 10.0
 SPACING_GROWTH = 1.25
+LATITUDE_BAND_DEGREES = 5.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,7 +24,8 @@ def corridor_grid(corridor: Sequence[LatLng], radius_miles: float, max_points: i
     if max_points < 1:
         raise ValueError("max_points must be positive")
 
-    ref_lat = sum(p.lat for p in corridor) / len(corridor)
+    raw_lat = sum(p.lat for p in corridor) / len(corridor)
+    ref_lat = round(raw_lat / LATITUDE_BAND_DEGREES) * LATITUDE_BAND_DEGREES
     lng_scale = max(math.cos(math.radians(ref_lat)), 0.01)
     spacing = INITIAL_SPACING_MILES
 

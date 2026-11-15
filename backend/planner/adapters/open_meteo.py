@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -7,6 +8,8 @@ import httpx
 
 from planner.domain.entities import LatLng, WeatherSample
 from planner.ports import ProviderError
+
+logger = logging.getLogger(__name__)
 
 HOURLY_VARS = "wind_speed_10m,rain,showers,snowfall"
 FORECAST_DAYS = 10
@@ -122,8 +125,15 @@ class OpenMeteoWeather:
             try:
                 response = self._client.get(self._base_url, params=params)
                 response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code == 429:
+                    raise ProviderError(
+                        "Weather service rate limit reached. Please try again in a minute."
+                    ) from None
+                status_code = exc.response.status_code
+                raise ProviderError(f"Open-Meteo request failed with status {status_code}") from None
             except httpx.HTTPError as exc:
-                raise ProviderError(f"Open-Meteo request failed: {exc}") from exc
+                raise ProviderError(f"Open-Meteo request failed: {type(exc).__name__}") from None
 
             data = response.json()
             items = data if isinstance(data, list) else [data]
@@ -136,6 +146,8 @@ class OpenMeteoWeather:
             self._cache.set_many(
                 {cache_keys[loc]: s for loc, s in fresh.items()}, timeout=self._cache_seconds
             )
-
+        logger.info(
+            "Open-Meteo: %d locations (%d cached, %d fetched)", len(locations), len(result), len(fresh)
+        )
         result.update(fresh)
         return result

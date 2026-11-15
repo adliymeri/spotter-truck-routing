@@ -98,3 +98,18 @@ def test_cached_locations_are_not_requested_again():
     weather.get_samples([(LatLng(40.0, -100.0), DAY)])
     weather.get_samples([(LatLng(40.0, -100.0), DAY)])
     assert len(requests_made) == 1
+
+
+def test_rate_limit_gives_friendly_message():
+    client = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(429)))
+    weather = OpenMeteoWeather(
+        base_url="https://test.local/forecast",
+        timeout_seconds=1,
+        batch_size=100,
+        client=client,
+        now=lambda: DAY,
+    )
+    with pytest.raises(ProviderError) as exc:
+        weather.get_samples([(LatLng(40.0, -100.0), DAY)])
+    assert "rate limit" in str(exc.value)
+    assert "https://" not in str(exc.value)

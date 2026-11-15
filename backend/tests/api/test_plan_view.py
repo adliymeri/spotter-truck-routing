@@ -69,3 +69,15 @@ def test_provider_failure_returns_502(monkeypatch):
     response = post(payload())
     assert response.status_code == 502
     assert response.json()["detail"] == "Mapbox unavailable"
+
+
+def test_unexpected_error_returns_json_500(monkeypatch):
+    class ExplodingRouting:
+        def get_routes(self, *args, **kwargs):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(wiring, "routing", lambda: ExplodingRouting())
+    monkeypatch.setattr(wiring, "weather", lambda: FakeWeather(lambda p, t: WeatherSample(0, 0, 0)))
+    response = post(payload())
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Internal server error."}

@@ -1,3 +1,4 @@
+import logging
 import math
 from collections.abc import Iterable, Sequence
 from dataclasses import replace
@@ -15,6 +16,8 @@ MILES_PER_DEGREE_LAT = 69.0
 DETOUR_FACTORS = (0.15, -0.15, 0.3, -0.3)
 OVERLAP_CELL_DEGREES = 0.01
 MAX_SHARED_FRACTION = 0.8
+
+logger = logging.getLogger(__name__)
 
 
 class MapboxRouting:
@@ -42,7 +45,8 @@ class MapboxRouting:
             via = _detour_point(routes[0], origin, destination, factor)
             try:
                 candidates = self._request([origin, via, destination], False, max_weight_lb)
-            except ProviderError:
+            except ProviderError as exc:
+                logger.info("Detour attempt %.2f failed: %s", factor, exc)
                 continue
             routes.extend(c for c in candidates if _is_distinct(c, routes))
 

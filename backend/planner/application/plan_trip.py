@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -8,6 +9,8 @@ from planner.domain.sampling import sample_checkpoints
 from planner.ports import RoutingProvider, WeatherProvider
 
 MAX_ROUTES = 3
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,4 +60,10 @@ def plan_trip(request: TripRequest, routing: RoutingProvider, weather: WeatherPr
         plans.append(RoutePlan(route, assessed, summarize_route(route, assessed)))
 
     ranking = tuple(s.route_id for s in rank_routes([p.summary for p in plans]))
+    logger.info(
+        "Planned trip: %d routes, %d checkpoints, recommended %s",
+        len(plans),
+        len(all_checkpoints),
+        ranking[0],
+    )
     return TripPlan(request, tuple(plans), ranking)
