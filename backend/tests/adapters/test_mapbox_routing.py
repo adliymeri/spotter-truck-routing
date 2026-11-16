@@ -1,8 +1,9 @@
 import httpx
 import pytest
 
-from planner.adapters.mapbox_routing import MapboxRouting
-from planner.domain.entities import LatLng
+from planner.adapters.mapbox_routing import MapboxRouting, _backtracks
+from planner.domain.entities import LatLng, RouteOption
+from planner.domain.geo import cumulative_miles
 from planner.ports import ProviderError
 
 TOKEN = "pk.test-secret"
@@ -114,3 +115,36 @@ def test_http_error_does_not_leak_token():
 def test_missing_token_is_rejected():
     with pytest.raises(ValueError):
         MapboxRouting(token="", base_url="https://x", timeout_seconds=1)
+
+
+def _line(start, end, steps=100):
+    (lat1, lng1), (lat2, lng2) = start, end
+    return [(lat1 + (lat2 - lat1) * k / steps, lng1 + (lng2 - lng1) * k / steps) for k in range(steps)]
+
+
+def _route_from(points):
+    geometry = tuple(LatLng(lat, lng) for lat, lng in points)
+    miles = tuple(cumulative_miles(geometry))
+    return RouteOption(
+        id="r",
+        geometry=geometry,
+        cumulative_miles=miles,
+        cumulative_hours=tuple(m / 60 for m in miles),
+        distance_miles=miles[-1],
+        duration_hours=miles[-1] / 60,
+    )
+
+
+def test_straight_route_does_not_backtrack():
+    assert not _backtracks(_route_from(_line((41.3, -105.0), (41.3, -106.0), 200) + [(41.3, -106.0)]))
+
+
+def test_out_and_back_spur_backtracks():
+    points = (
+        _line((41.3, -105.0), (41.3, -105.5))
+        + _line((41.3, -105.5), (41.1, -105.5))
+        + _line((41.1, -105.5), (41.3, -105.5))
+        + _line((41.3, -105.5), (41.3, -106.0))
+        + [(41.3, -106.0)]
+    )
+    assert _backtracks(_route_from(points))

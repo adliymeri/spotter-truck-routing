@@ -16,6 +16,8 @@ MILES_PER_DEGREE_LAT = 69.0
 DETOUR_FACTORS = (0.15, -0.15, 0.3, -0.3)
 OVERLAP_CELL_DEGREES = 0.01
 MAX_SHARED_FRACTION = 0.8
+MAX_BACKTRACK_FRACTION = 0.05
+BACKTRACK_MIN_GAP_MILES = 5.0
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +50,7 @@ class MapboxRouting:
             except ProviderError as exc:
                 logger.info("Detour attempt %.2f failed: %s", factor, exc)
                 continue
-            routes.extend(c for c in candidates if _is_distinct(c, routes))
-
+            routes.extend(c for c in candidates if not _backtracks(c) and _is_distinct(c, routes))
         selected = sorted(routes[:max_routes], key=lambda r: r.duration_hours)
         return [replace(r, id=f"route-{i + 1}") for i, r in enumerate(selected)]
 
@@ -156,3 +157,15 @@ def _shared_fraction(candidate: RouteOption, other_cells: set[Cell]) -> float:
 
 def _is_distinct(candidate: RouteOption, existing: Sequence[RouteOption]) -> bool:
     return all(_shared_fraction(candidate, _cells(r)) <= MAX_SHARED_FRACTION for r in existing)
+
+
+def _backtracks(route: RouteOption) -> bool:
+    """True if the route drives back over road it already used, e.g. an out-and-back spur."""
+    first_seen: dict[Cell, float] = {}
+    backtracked = 0.0
+    for i, point in enumerate(route.geometry):
+        mile = route.cumulative_miles[i]
+        seen = first_seen.setdefault(_cell(point), mile)
+        if i and mile - seen > BACKTRACK_MIN_GAP_MILES:
+            backtracked += mile - route.cumulative_miles[i - 1]
+    return backtracked > MAX_BACKTRACK_FRACTION * route.distance_miles
